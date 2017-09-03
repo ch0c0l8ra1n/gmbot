@@ -9,6 +9,7 @@ import time
 import socket
 import os
 from _thread import *
+import threading
 import subprocess
 from socket import error as socket_error
 
@@ -33,7 +34,8 @@ def warmup(gmail_driver,gmx_driver):
 			gmail_driver.get(gmail)
 			gmail_driver.find_element_by_tag_name('body').click()
 			gmx_driver.get(gmx)
-		except:
+		except Exception as e:
+			print (e)
 			print('warmup failed')
 	print('Warmup time: ',time.time()-t1)
 
@@ -115,8 +117,12 @@ def work(csocket):
 		if data.decode() == '\n' :
 			break
 		stuff+=data.decode()
+	try:
+		u_range = int(stuff)
+	except:
+		u_range = 50
+		csocket.send('\n\rERROR using default value 50\n'.encode())
 
-	u_range = int(stuff)
 	gmx_driver = webdriver.Chrome(chrome_options=options)
 	gmx_driver.implicitly_wait(5)
 	gmail_driver = webdriver.Chrome(chrome_options=options)
@@ -163,6 +169,7 @@ def work(csocket):
 					gmail_driver.close()
 					gmx_driver.close()
 					csocket.close()
+					return
 				except Exception as e:
 					print('1\n',e)
 					gmail_driver.get(gmail)
@@ -181,6 +188,7 @@ def work(csocket):
 		gmail_driver.close()
 		gmx_driver.close()
 		csocket.close()
+		return
 
 	except Exception as e:
 		print ('3\n',e)
@@ -197,12 +205,13 @@ print("hosting at "+str(host) +":"+str(serverPort))
 os.system('killall chrome')
 socketServer.listen(5000)
 
+
 while True:
 	try:
 		print("Listening...")  
 		(csocket , address) = socketServer.accept()
 		print(address[0]+':'+str(address[1])+' has connected.')
-		start_new_thread(work,(csocket,))
+		threading.Thread(target=work,args=(csocket,)).start()
 		#work(csocket)
 	except Exception as e:
 		print('4\n',e)
