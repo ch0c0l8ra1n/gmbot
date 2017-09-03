@@ -189,7 +189,7 @@ def work(csocket):
 os.system('fuser -k 1234/tcp')
 
 socketServer = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-host = '104.131.98.250'
+host = '46.101.204.68'
 serverPort = 1234
 socketServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 socketServer.bind((host,serverPort))
